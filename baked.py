@@ -41,3 +41,15 @@ def dict_flatten(input_dict):
     return flat
 
 #===============================================================#
+
+# Implementation to get an Ordered Set (list object)
+# The first occurring index of an element is considered its index in the ordered set.
+def OrderedSet(input_list):
+    ordered = []
+    for i in range(len(input_list)):
+        item = input_list[i]
+        if not item in ordered:
+            ordered.append(item)
+    return ordered
+
+#===============================================================#
