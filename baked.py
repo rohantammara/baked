@@ -82,28 +82,9 @@ def dict_unflatten(input_dict, separator='.', has_lists=False):
 # Implementation to get an Ordered Set (list object)
 # The first occurring index of an element is considered its index in the ordered set.
 def OrderedSet(input_list):
-    ordered = []
-    for i in range(len(input_list)):
-        item = input_list[i]
-        if not item in ordered:
-            ordered.append(item)
-    return ordered
-
+    seen = set()
+    return [x for x in input_list if not (x in seen or seen.add(x))]
 #===============================================================#
 
 if __name__ == "__main__":
-    # Test dict_unflatten() function
-    flattened_dict = {
-        'a': 1,
-        'b.x': 2,
-        'b.y.z': 3,
-        'c[0]': 4,
-        'c[1]': 5,
-        'c[2].d': 6,
-        'd.e[0]': 7,
-        'd.e[1]': 8
-    }
-    start = tic("dict_unflatten")
-    unflattened_dict = dict_unflatten(flattened_dict)
-    duration = toc(start)
-    print("Unflattened Dictionary: ", unflattened_dict)
+    pass
