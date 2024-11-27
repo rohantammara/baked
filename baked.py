@@ -20,7 +20,8 @@ def toc(start):
 #===============================================================#
 
 # Faster alternative to morph.flatten for flattening dictionaries
-def dict_flatten(input_dict):
+def dict_flatten(input_dict, separator='.'):
+
     flat = {}
     continue_flag = False
     for key in input_dict:
@@ -28,7 +29,7 @@ def dict_flatten(input_dict):
             for k in input_dict[key]:
                 if isinstance(input_dict[key][k], dict) or isinstance(input_dict[key][k], list):
                     continue_flag = True
-                flat[str(key)+'.'+str(k)] = input_dict[key][k]
+                flat[str(key)+separator+str(k)] = input_dict[key][k]
         elif isinstance(input_dict[key], list):
             for i in range(len(input_dict[key])):
                 flat[str(key)+'[{}]'.format(i)] = input_dict[key][i]
@@ -39,6 +40,42 @@ def dict_flatten(input_dict):
         flat = dict_flatten(flat)
     
     return flat
+
+#===============================================================#
+
+# Faster alternative to morph.unflatten
+# List suppport not present to account for square braces in key names
+
+def dict_unflatten(input_dict, separator='.', has_lists=False):
+    
+    assert isinstance(separator, str), "Separator has to be a string"
+
+    def nest_leaf(flat_dict, separator=separator):
+        out_dict = {}
+        keys = [*flat_dict.keys()]
+
+        for key in keys:
+            sub_keys = key.split(separator)
+            value = flat_dict[key]
+            if len(sub_keys) > 1:
+                leaf_key = sub_keys[-1]
+                trunk_key = separator.join(sub_keys[:-1])
+                if trunk_key in out_dict.keys():
+                    out_dict[trunk_key].update({leaf_key : value})
+                else:
+                    out_dict[trunk_key] = {leaf_key : value}
+            else:
+                out_dict.update({key : value})
+        
+        return out_dict
+    
+    is_flat = lambda key : separator in key
+
+    nested_dict = input_dict
+    while any(list(map(is_flat, nested_dict.keys()))):
+        nested_dict = nest_leaf(nested_dict)
+
+    return nested_dict
 
 #===============================================================#
 
@@ -53,3 +90,20 @@ def OrderedSet(input_list):
     return ordered
 
 #===============================================================#
+
+if __name__ == "__main__":
+    # Test dict_unflatten() function
+    flattened_dict = {
+        'a': 1,
+        'b.x': 2,
+        'b.y.z': 3,
+        'c[0]': 4,
+        'c[1]': 5,
+        'c[2].d': 6,
+        'd.e[0]': 7,
+        'd.e[1]': 8
+    }
+    start = tic("dict_unflatten")
+    unflattened_dict = dict_unflatten(flattened_dict)
+    duration = toc(start)
+    print("Unflattened Dictionary: ", unflattened_dict)
